@@ -1,0 +1,11 @@
+/.venv/
+__pycache__/
+.pytest_cache/
+.env
+.env.*
+/cache/
+/data/
+/outputs/
+/hipporag_public/data/
+/hipporag_public/e5-large-v2/
+*.safetensors

@@ -1,0 +1,15 @@
+# Install PyTorch with CUDA first (Windows wheels on PyPI are CPU-only), e.g.
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+# (pick the CUDA build that https://pytorch.org/get-started/locally/ shows for Windows + pip)
+transformers>=4.48
+jinja2>=3.1.6  # Required by current Transformers chat templates.
+huggingface_hub>=0.24
+brotli>=1.2.0  # Current Hugging Face HTTP clients use bounded Brotli decompression.
+datasets>=3.0
+numpy
+pandas
+pyarrow<26  # Arrow 26 requires NumPy 2 and pandas >=2.2.2; the base Anaconda ships older versions.
+tqdm
+spacy>=3.7
+# then:  python -m spacy download en_core_web_sm
+# only needed to rebuild the chunks yourself (replicate/make_chunks.py):  llama-index==0.9.40
