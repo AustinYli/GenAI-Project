@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MultiHop-RAG replication + two retrieval ideas
 
 Everything runs from this folder. GPU strongly recommended (written for an RTX 4070, 12 GB).
@@ -144,3 +145,6 @@ See the [held-out validation results](outputs/idea3_adapted/REPORT.md).
 
 About 5 GB for the Python environment with CUDA PyTorch, the models above, ~0.5–1 GB of
 arrow training vectors and ~0.3 GB of caches. `--no-cache-dir` keeps pip from storing extra copies.
+=======
+# GenAI-Project
+>>>>>>> 72684355acec9d12b8f8c00246ed65a1836adfea
