@@ -118,6 +118,26 @@ for cohort, rows in (('test', [r for r in step1 if r['qid'] in pos]), ('pooled',
                'latency': sec, 'latency_note': 'measured; cached dense ranking (BGE query encoding ~0.007 s not included)'}
         (test_rows if cohort == 'test' else pooled_step1).append(row)
 
+# DPO splitter + per-sub-query reranker (System C), test split and all 2,251 CV questions
+dpo_c_path = ROOT / 'outputs/reranker/dpo_c_rankings.json'
+dpo_c_names = {'zero_base': 'Qwen2.5-3B zero-shot, untrained + reranker per sub-query (C)',
+               'zero_dpo': 'Qwen2.5-3B zero-shot, DPO + reranker per sub-query (C)',
+               'few_base': 'Qwen2.5-3B few-shot, untrained + reranker per sub-query (C)',
+               'few_dpo': 'Qwen2.5-3B few-shot, DPO + reranker per sub-query (C)'}
+if dpo_c_path.exists():
+    dpo_rows = read('outputs/reranker/dpo_c_rankings.json')['rows']
+    for cohort, rows in (('test', [r for r in dpo_rows if r['qid'] in pos]), ('pooled', dpo_rows)):
+        g = [gold_facts(queries[r['qid']]) for r in rows]
+        for key, name in dpo_c_names.items():
+            texts = [[chunks[c]['text'] for c in r['systems'][key]['ids@10']] for r in rows]
+            m = calculate_metrics(texts, g)
+            m.update(coverage(texts, g))
+            sec = statistics.mean(r['systems'][key]['seconds_with_split'] for r in rows)
+            row = {'group': 'DPO splitter + reranker (System C)', 'method': name, 'n': len(rows), **m,
+                   'latency': sec, 'latency_note': 'measured: split + candidates + reranking + selection '
+                                                   '(sub-query lists BM25-only, top 60)'}
+            (test_rows if cohort == 'test' else pooled_step1).append(row)
+
 # ---------------- latency for test rows (only where measured) ----------------
 llm = read('outputs/llm_decomp_bigger/results.json')['generation']
 idea3_lat = read('outputs/idea3/eval_original.json')['latency']
@@ -235,7 +255,6 @@ for name, (h4, h10, mp, mrr), lat in AM:
                                        if lat is not None else 'not reported')})
 
 pending = [
-    ('DPO splitter (3B zero-shot / few-shot) + reranker per sub-query (Algorithm 1)', 'running (outputs/reranker/dpo_c.log)'),
     ('Ammann et al. reimplemented in our setup (QD + reranking vs original query)', 'not run yet'),
     ('Reranker preference fine-tuning, Bradley-Terry (Algorithm 3)', 'planned'),
     ('Idea 1 with claim-level residual queries; DPO with graded pairs (audit fixes)', 'not run yet'),
@@ -277,6 +296,7 @@ pairs = [
     ('Ammann: + QD', step1_names['A']),
     ('Ammann: + QD + RR (their method)', step1_names['B']),
     ('Ammann: + QD + RR (their method)', step1_names['C']),
+    ('Ammann: + QD + RR (their method)', dpo_c_names['few_dpo']),
 ]
 pub_by = {('MultiHop-RAG: ' if p['source'].startswith('MultiHop') else 'Ammann: ') + p['method']: p for p in published}
 h2h = []
