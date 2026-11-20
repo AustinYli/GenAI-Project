@@ -21,11 +21,15 @@ class CrossEncoderReranker:
         self.max_length = max_length
 
     def score(self, query: str, passages: List[str], batch_size: int = 32) -> List[float]:
+        return self.score_pairs([(query, passage) for passage in passages], batch_size)
+
+    def score_pairs(self, pairs, batch_size: int = 32) -> List[float]:
+        """Return raw logits for an ordered batch of query and passage pairs."""
         import torch
         out = []
-        for s in range(0, len(passages), batch_size):
-            pairs = [[query, p] for p in passages[s:s + batch_size]]
-            enc = self.tokenizer(pairs, padding=True, truncation=True, return_tensors="pt", max_length=self.max_length)
+        for s in range(0, len(pairs), batch_size):
+            enc = self.tokenizer(list(pairs[s:s + batch_size]), padding=True, truncation=True,
+                                 return_tensors="pt", max_length=self.max_length)
             enc = {k: v.to(self.device) for k, v in enc.items()}
             with torch.inference_mode():
                 out.extend(self.model(**enc, return_dict=True).logits.view(-1).float().cpu().tolist())
