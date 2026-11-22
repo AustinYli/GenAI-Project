@@ -50,7 +50,6 @@ def make_split(queries=None, out_dir=OUT):
         counts = Counter(labels[i] for i in indexes)
         return sum(((counts[kind] - target) / target) ** 2 for kind, target in targets.items())
 
-    # Use only dev group membership and labels to choose the fold nearest 25% of each type.
     fold, (train_idx, heldout_idx) = min(
         enumerate(stratifier.split(remaining, labels, groups)), key=lambda row: distance(row[1][1]),
     )
@@ -64,7 +63,6 @@ def make_split(queries=None, out_dir=OUT):
     manifest = {
         'seed': DESIGN['split_seed'], 'fold': fold, 'examples': list(EXAMPLES), 'excluded_dev': excluded,
         'dev': remaining, 'train': train, 'heldout': heldout, 'test': test,
-        # The inherited benchmark split is kept. These IDs document overlap for reporting only.
         'demo_related_test': [qid for qid in test if test_groups[qid] in demo_groups],
         'train_related_test': [qid for qid in test if test_groups[qid] in train_groups],
         'dev_by_type': {split: dict(Counter(queries[qid]['question_type'] for qid in ids))

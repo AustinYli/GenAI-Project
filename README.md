@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # MultiHop-RAG replication + two retrieval ideas
 
 Everything runs from this folder. GPU strongly recommended (written for an RTX 4070, 12 GB).
@@ -49,7 +48,7 @@ Target (paper Table 5, bge-large-en-v1.5):
 | without reranker | 0.4298 | 0.3423 | 0.6718 | 0.5221 |
 | with reranker | 0.563 | 0.4759 | 0.7183 | 0.6364 |
 
-How faithful it is:
+How closely it matches the original:
 * **Chunks** were produced by the original pipeline itself (llama-index 0.9.40, `SentenceSplitter(chunk_size=256)`
   with its default 200-token overlap, tiktoken gpt-3.5 counting, the repo's `CustomExtractor`). That gives
   42,065 chunks, each with the template `[Excerpt from document]\ntitle: …\npublished_at: …\nsource: …\nExcerpt:\n-----\n…`.
@@ -119,16 +118,15 @@ $env:HF_HUB_OFFLINE = '1'
 & .\.venv\Scripts\python.exe idea3_multivector\evaluate.py --device cuda
 ```
 
-Training saves the independently selected MuSiQue-validation checkpoints and curve in `cache/multivector/`.
+Training saves the best MuSiQue-validation checkpoints and the training curve in `cache/multivector/`.
 Evaluation saves original and outlet-masked results for both budgets in `outputs/idea3/`.
-See the [completed GPU results](outputs/idea3/REPORT.md).
+Results: [outputs/idea3/REPORT.md](outputs/idea3/REPORT.md).
 
 ### News adaptation experiment
 
-This experiment starts at the saved four-vector checkpoints and splits the former MultiHop-RAG
-dev questions into article-disjoint training and validation folds. It compares local adaptation
-with and without auxiliary multi-document news evidence from Continual-Eval. The original test
-questions are outside both folds.
+Starts from the saved four-vector checkpoints and splits the MultiHop-RAG dev questions into
+training and validation folds that share no articles. Adaptation is compared with and without
+extra multi-document news evidence from Continual-Eval. Test questions are not in either fold.
 
 ```powershell
 $env:HF_HOME = Join-Path (Get-Location) 'cache\hf'
@@ -139,12 +137,9 @@ $env:HF_HUB_OFFLINE = '1'
 ```
 
 The split manifest, adapted heads and validation results are written to `outputs/idea3_adapted/`.
-See the [held-out validation results](outputs/idea3_adapted/REPORT.md).
+Results: [outputs/idea3_adapted/REPORT.md](outputs/idea3_adapted/REPORT.md).
 
 ## Disk
 
 About 5 GB for the Python environment with CUDA PyTorch, the models above, ~0.5–1 GB of
 arrow training vectors and ~0.3 GB of caches. `--no-cache-dir` keeps pip from storing extra copies.
-=======
-# GenAI-Project
->>>>>>> 72684355acec9d12b8f8c00246ed65a1836adfea

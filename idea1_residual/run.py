@@ -210,7 +210,6 @@ def main():
     # D1 = what the first search hands over (same rule the dense baseline uses)
     d1 = first_pass(a, dense, run_q, chunks)
 
-    # 1. spans (cached)
     sp_path = os.path.join(cache, "spans.json")
     spans_all = load_json(sp_path, {})
     todo = [q for q in run_q if str(q) not in spans_all]
@@ -224,7 +223,6 @@ def main():
     print(f"spans: {np.mean([len(spans[q]) for q in run_q]):.1f} per question, {np.mean(n_t):.1f} targets; "
           f"{sum(x == 0 for x in n_t)} questions with no target")
 
-    # 2. gains (cached per scorer and K)
     tag = a.scorer if a.scorer == "word" else f"{a.scorer}__{paths.model_slug(a.mlm if a.scorer == 'mlm' else a.llm)}"
     g_path = os.path.join(cache, f"gains_{tag}_K{a.K}{dd}.json")
     gains_all = load_json(g_path, {})
@@ -251,7 +249,6 @@ def main():
     gains = {q: gains_all[str(q)]["gains"] for q in run_q}
     secs = [gains_all[str(q)]["sec"] for q in run_q]
 
-    # 3. Search all candidates for tuning, or just the selected queries at test time.
     second_all, search_seconds = build_second_searches(a, cache, f"K{a.K}{dd}{form}",
                                                        run_q, queries, spans, gains, d1)
     second = {q: {k: v["ids"] for k, v in second_all.get(str(q), {}).items()} for q in run_q}
@@ -270,7 +267,6 @@ def main():
         ok = [all(facts_found([chunks[c]["text"] for c in sel[q]], gold_facts(queries[q]), a.K)) for q in qids]
         return float(np.mean(ok)) if ok else 0.0
 
-    # 4. pick tau on dev
     dev_gains = [g for q in dev for g in gains[q]]
     if a.tau is not None:
         tau, sweep = a.tau, []
@@ -286,7 +282,6 @@ def main():
         tau = best["tau"]
     print(f"tau = {tau:.4f}" + (" (tuned on dev)" if a.tau is None else ""))
 
-    # 5. Test-only runs measure the chosen policy without precomputing unused queries.
     eval_q = dev if a.split == "dev" else test
     eval_name = "dev" if a.split == "dev" else "test"
     tuned_name = f"idea1 ({a.scorer}, tau={tau:.3g})"
@@ -314,7 +309,6 @@ def main():
     print(f"\n{eval_name.upper()} ({len(eval_q)} answerable questions, K={a.K}, "
           f"max_per_article={a.max_per_article}, dedup_overlap={a.dedup_overlap})\n" + table)
 
-    # 6. H1: does the signal predict that D1 is missing evidence?
     h1 = {}
     wp = os.path.join(cache, f"gains_word_K{a.K}{dd}.json")
     if a.scorer == "word":

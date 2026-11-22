@@ -212,7 +212,6 @@ def run_generation(model, prompt, qids, path, *, n=1, temperature=None, top_p=No
         write_json(path, saved)
         position += len(batch_qids)
         print(f'{path.stem} {len(rows)}/{len(order)} ({elapsed:.3f} s/question)', flush=True)
-        # Keep inactive allocator blocks from crowding the physical GPU memory on WDDM.
         if reserved_limit and torch.cuda.memory_reserved() > reserved_limit:
             torch.cuda.empty_cache()
     del llm

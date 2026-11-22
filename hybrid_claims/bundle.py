@@ -54,7 +54,6 @@ def fused_bundle_lists(qids, subquestions, bm, index, model):
         extras[q]['concat'] = run.rrf([concat_ids, joined_bm25], k=rrf_k)[:depth]
         extras[q]['mean'] = run.rrf([mean_ids, joined_bm25], k=rrf_k)[:depth]
 
-    # Each reduction sees every corpus score. Candidate truncation happens after the maxima.
     for start in range(0, len(active), 32):
         questions = active[start:start + 32]
         groups = [ids[q] for q in questions]

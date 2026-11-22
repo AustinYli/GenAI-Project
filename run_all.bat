@@ -1,6 +1,6 @@
 @echo off
 setlocal
-rem  pass --nopause to run without waiting for a key press (for agents / scripts)
+rem  pass --nopause to run without waiting for a key press
 set NOPAUSE=%~1
 cd /d "%~dp0"
 set PY=%~dp0.venv\Scripts\python.exe

@@ -161,7 +161,6 @@ def main():
                   'Model loading, length sorting, indexed retrieval setup, cache I/O and metrics are excluded.',
         'shared_candidate_backfill': False,
     }
-    # Changes to timings or experiment settings also keep unrelated scores in separate caches.
     signature = sha256((OUT / 'step1_candidates.json').read_bytes() + json.dumps(design, sort_keys=True).encode())
     cache_path = OUT / f'step1_logits_{signature.hexdigest()[:16]}.sqlite3'
     model_path = Path(paths.CACHE) / 'hf' / 'hub' / 'models--BAAI--bge-reranker-large' / 'snapshots' / REVISION

@@ -51,8 +51,6 @@ def validation_split(pool, queries, article_sets):
     def distance(counts):
         return sum(((counts.get(kind, 0) - target) / max(target, 1)) ** 2 for kind, target in targets.items())
 
-    # A seven-way split supplies candidates near 15%. Refine the closest one
-    # using group additions and removals based solely on counts in this pool.
     initial = min((heldout for _, heldout in grouped_folds(pool, queries, article_sets, n_splits=7)),
                   key=lambda qids: distance(type_counts(qids, queries)))
     heldout_groups = {article_sets[qid] for qid in initial}
